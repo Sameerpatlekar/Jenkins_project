@@ -59,7 +59,7 @@ pipeline {
                     // Update the deployment image version
                     withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
                       sh """
-                          mkdir git_repo
+                          mkdir -p git_repo
                           cd git_repo
                           git init
                           pwd
