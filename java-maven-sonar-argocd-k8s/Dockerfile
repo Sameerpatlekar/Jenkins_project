@@ -10,9 +10,14 @@ ENV JAVA_VERSION=jdk-11.0.11+9 \
     LANGUAGE=en_US:en \
     LC_ALL=en_US.UTF-8
 
-# Install Maven
+# Install Maven and necessary packages
 RUN apt-get update && \
-    apt-get install -y maven
+    apt-get install -y maven && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set the JAVA_HOME to the correct path
+RUN export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 && \
+    echo "JAVA_HOME set to $JAVA_HOME"
 
 # Copy the Maven entrypoint script
 COPY mvn-entrypoint.sh /usr/local/bin/mvn-entrypoint.sh
