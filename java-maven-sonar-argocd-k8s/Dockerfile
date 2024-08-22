@@ -1,5 +1,6 @@
 # Use a minimal Alpine image with OpenJDK 11
-FROM openjdk:11-jdk-alpine
+FROM openjdk:11-jdk-slim
+
 
 # Set environment variables
 ENV JAVA_VERSION=jdk-11.0.11+9 \
