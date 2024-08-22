@@ -19,6 +19,7 @@ Steps:
        1.2 Maven Integration plugin
        1.3 Pipeline plugin
        1.4 Kubernetes Continuous Deploy plugin
+       1.5 docker pipeline pugin
 
     2. Create a new Jenkins pipeline:
        2.1 In Jenkins, create a new pipeline job and configure it with the Git repository URL for the Java application.
