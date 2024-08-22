@@ -1,7 +1,6 @@
 # Use a minimal Alpine image with OpenJDK 11
 FROM openjdk:11-jdk-slim
 
-
 # Set environment variables
 ENV JAVA_VERSION=jdk-11.0.11+9 \
     JAVA_HOME=/opt/java/openjdk \
@@ -12,7 +11,8 @@ ENV JAVA_VERSION=jdk-11.0.11+9 \
     LC_ALL=en_US.UTF-8
 
 # Install Maven
-RUN apk add --no-cache maven
+RUN apt-get update && \
+    apt-get install -y maven
 
 # Copy the Maven entrypoint script
 COPY mvn-entrypoint.sh /usr/local/bin/mvn-entrypoint.sh
@@ -25,5 +25,3 @@ ENTRYPOINT ["/usr/local/bin/mvn-entrypoint.sh"]
 
 # Default command to run Maven
 CMD ["mvn"]
-
-# Note: Adjust the CMD and ENTRYPOINT depending on your needs

@@ -16,13 +16,13 @@ pipeline {
         steps {
           sh 'ls -ltr'
           // build the project and create a JAR file
-          sh 'cd java-maven-sonar-argocd-k8s/spring-boot-app && mvn clean package'
+          sh 'cd java-maven-sonar-argocd-k8s/spring-boot-app && /usr/local/bin/mvn clean package'
         }
       }
       stage('SonarQube analysis') {
           steps{
               withSonarQubeEnv('sonar') {
-                  sh 'cd java-maven-sonar-argocd-k8s/spring-boot-app && mvn clean package sonar:sonar'
+                  sh 'cd java-maven-sonar-argocd-k8s/spring-boot-app && /usr/local/bin/mvn clean package sonar:sonar'
               } // submitted SonarQube taskId is automatically attached to the pipeline context
           }
       }
