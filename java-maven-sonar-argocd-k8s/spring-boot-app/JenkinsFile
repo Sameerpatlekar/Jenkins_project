@@ -59,7 +59,8 @@ pipeline {
                     // Update the deployment image version
                     withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
                       sh """
-                          cd java-maven-sonar-argocd-k8s
+                          mkdir git_repo
+                          cd git_repo
                           git init
                           pwd
                           git config user.email "sameer.gcp.jam@gmail.com"
