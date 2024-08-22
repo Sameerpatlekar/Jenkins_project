@@ -59,6 +59,7 @@ pipeline {
                     // Update the deployment image version
                     withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
                       sh """
+                          pwd
                           git config user.email "sameer.gcp.jam@gmail.com"
                           git config user.name "Sameer Patlekar"
                           BUILD_NUMBER=${BUILD_NUMBER}
