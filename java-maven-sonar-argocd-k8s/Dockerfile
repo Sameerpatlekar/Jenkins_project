@@ -20,7 +20,7 @@ COPY mvn-entrypoint.sh /usr/local/bin/mvn-entrypoint.sh
 # Make the entrypoint script executable
 RUN chmod +x /usr/local/bin/mvn-entrypoint.sh
 
-# Set the entrypoint
+# Set the entrypoint to run Maven or any other passed command
 ENTRYPOINT ["/usr/local/bin/mvn-entrypoint.sh"]
 
 # Default command to run Maven
