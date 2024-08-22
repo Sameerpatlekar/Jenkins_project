@@ -1,7 +1,17 @@
-#!/bin/bash
-# This script ensures that the passed command is run after the entrypoint script
+#!/bin/sh
+# A basic Maven entrypoint script
 
-set -e
+# If a command starts with an option, prepend `mvn`
+if [ "${1#-}" != "$1" ]; then
+  set -- mvn "$@"
+fi
 
-# Run the command passed as argument to the script or default to "mvn"
+# If the first argument is `mvn`, set some default options
+if [ "$1" = 'mvn' ]; then
+  # Here you can set any default options or environment variables
+  export MAVEN_OPTS="${MAVEN_OPTS} -Xmx512m"
+fi
+
+# Execute the provided command or fall back to the shell
+# to pass multiple arguments we use $@
 exec "$@"
