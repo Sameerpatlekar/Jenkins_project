@@ -1,77 +1,77 @@
 pipeline {
     agent {
         docker {
-      image 'sameerpatlekar/java-maven-agent:v1'
-      args '--user root -v /var/run/docker.sock:/var/run/docker.sock' // mount Docker socket to access the host's Docker daemon
-    }
-  }
-  stages {
-    stage('Checkout') {
-      steps {
-        git branch: 'main', url: 'https://github.com/Sameerpatlekar/Jenkins_project.git'
-        sh 'echo passed'
-      }
-    }
-    stage('Build and Test') {
-      steps {
-        sh 'ls -ltr'
-        // build the project and create a JAR file
-        sh 'cd java-maven-sonar-argocd-k8s/spring-boot-app && mvn clean package'
-      }
-    }
-    stage('SonarQube analysis') {
-        steps{
-            withSonarQubeEnv('sonar') {
-                sh 'cd java-maven-sonar-argocd-k8s/spring-boot-app && mvn clean package sonar:sonar'
-            } // submitted SonarQube taskId is automatically attached to the pipeline context
+            image 'sameerpatlekar/java-maven-agent:v1'
+            args '--user root -v /var/run/docker.sock:/var/run/docker.sock' // mount Docker socket to access the host's Docker daemon
         }
     }
-    stage('Build and Push Docker Image') {
-      environment {
-        DOCKER_IMAGE = "sameerpatlekar/jenkins:${BUILD_NUMBER}"
-        // DOCKERFILE_LOCATION = "java-maven-sonar-argocd-k8s/spring-boot-app/Dockerfile"
-        REGISTRY_CREDENTIALS = credentials('docker-cred')
-      }
-      steps {
-        script {
-            sh 'cd java-maven-sonar-argocd-k8s/spring-boot-app && docker build -t ${DOCKER_IMAGE} .'
-            def dockerImage = docker.image("${DOCKER_IMAGE}")
-            docker.withRegistry('https://index.docker.io/v1/', "docker-cred") {
-                dockerImage.push()
-            }
+    stages {
+      stage('Checkout') {
+        steps {
+          git branch: 'main', url: 'https://github.com/Sameerpatlekar/Jenkins_project.git'
+          sh 'echo passed'
         }
       }
-    }
-    stage('Update Deployment File') {
+      stage('Build and Test') {
+        steps {
+          sh 'ls -ltr'
+          // build the project and create a JAR file
+          sh 'cd java-maven-sonar-argocd-k8s/spring-boot-app && mvn clean package'
+        }
+      }
+      stage('SonarQube analysis') {
+          steps{
+              withSonarQubeEnv('sonar') {
+                  sh 'cd java-maven-sonar-argocd-k8s/spring-boot-app && mvn clean package sonar:sonar'
+              } // submitted SonarQube taskId is automatically attached to the pipeline context
+          }
+      }
+      stage('Build and Push Docker Image') {
         environment {
-            GIT_REPO_NAME = "jenkins_project"
-            GIT_USER_NAME = "sameerpatlekar"
+          DOCKER_IMAGE = "sameerpatlekar/jenkins:${BUILD_NUMBER}"
+          // DOCKERFILE_LOCATION = "java-maven-sonar-argocd-k8s/spring-boot-app/Dockerfile"
+          REGISTRY_CREDENTIALS = credentials('docker-cred')
         }
-          steps {
-            script {
-                  // Get the previous successful build number
-                  def previousBuild = currentBuild.previousBuild
-                  while (previousBuild != null && previousBuild.result != 'SUCCESS') {
-                      previousBuild = previousBuild.previousBuild
-                  }
-                  def previousBuildNumber = previousBuild?.number ?: 'replace_tag' // Default to replace_tag if no previous successful build is found
+        steps {
+          script {
+              sh 'cd java-maven-sonar-argocd-k8s/spring-boot-app && docker build -t ${DOCKER_IMAGE} .'
+              def dockerImage = docker.image("${DOCKER_IMAGE}")
+              docker.withRegistry('https://index.docker.io/v1/', "docker-cred") {
+                  dockerImage.push()
+              }
+          }
+        }
+      }
+      stage('Update Deployment File') {
+          environment {
+              GIT_REPO_NAME = "jenkins_project"
+              GIT_USER_NAME = "sameerpatlekar"
+          }
+            steps {
+              script {
+                    // Get the previous successful build number
+                    def previousBuild = currentBuild.previousBuild
+                    while (previousBuild != null && previousBuild.result != 'SUCCESS') {
+                        previousBuild = previousBuild.previousBuild
+                    }
+                    def previousBuildNumber = previousBuild?.number ?: 'replace_tag' // Default to replace_tag if no previous successful build is found
 
-                  // Update the deployment image version
-                  withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
-                    sh """
-                        git config user.email "sameer.gcp.jam@gmail.com"
-                        git config user.name "Sameer Patlekar"
-                        BUILD_NUMBER=${BUILD_NUMBER}
-                        git pull https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
-                        sed -i "s/${previousBuildNumber}/${BUILD_NUMBER}/g" java-maven-sonar-argocd-k8s/spring-boot-app-manifests/deployment.yml
-                        git add java-maven-sonar-argocd-k8s/spring-boot-app-manifests/deployment.yml
-                        git commit -m "Update deployment image to version ${BUILD_NUMBER}"
-                        git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
-                      """
-                }
-            }
-        }
-    }
-}
-}
+                    // Update the deployment image version
+                    withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+                      sh """
+                          git config user.email "sameer.gcp.jam@gmail.com"
+                          git config user.name "Sameer Patlekar"
+                          BUILD_NUMBER=${BUILD_NUMBER}
+                          git pull https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+                          sed -i "s/${previousBuildNumber}/${BUILD_NUMBER}/g" java-maven-sonar-argocd-k8s/spring-boot-app-manifests/deployment.yml
+                          git add java-maven-sonar-argocd-k8s/spring-boot-app-manifests/deployment.yml
+                          git commit -m "Update deployment image to version ${BUILD_NUMBER}"
+                          git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main
+                        """
+                  }
+              }
+          }
+      }
+  }
+  }
 
