@@ -77,10 +77,11 @@ pipeline {
               }
               
           }
-      stage('Clean Workspace') {
-            steps {
-                cleanWs()
-            }
+    }
+    post {
+        success {
+            // This will clean the workspace if the build is successful
+            cleanWs()
         }
     }
       
