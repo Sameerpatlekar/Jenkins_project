@@ -11,6 +11,7 @@ Prerequisites:
    -   Jenkins server
    -  Kubernetes cluster
    -  Argo CD
+   -  docker, git
 
 Steps:
 
